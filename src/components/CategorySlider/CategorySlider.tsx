@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./CategorySlider.module.css";
 
 interface Category {
@@ -20,56 +20,87 @@ const CategorySlider = ({
     Record<string | number, boolean>
   >({});
   const [translateX, setTranslateX] = useState(0);
+  const [cardWidth, setCardWidth] = useState(66); 
   const sliderRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const currentX = useRef(0);
+  const startTranslateX = useRef(0); 
   const isDragging = useRef(false);
 
-  // Функция нормализации названия: первая буква заглавная, остальные строчные
+  useEffect(() => {
+    const updateCardWidth = () => {
+      let width = 66;
+      if (window.innerWidth >= 600) width = 114;
+      else if (window.innerWidth >= 425) width = 79;
+      setCardWidth(width);
+    };
+    updateCardWidth();
+    window.addEventListener("resize", updateCardWidth);
+    return () => window.removeEventListener("resize", updateCardWidth);
+  }, []);
+
+  // Функция нормализации названия
   const normalizeTitle = (title: string): string => {
     if (!title) return "";
     return title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
   };
 
-  // Функция для обработки ошибки загрузки изображения
+  // Обработка ошибки изображения
   const handleImageError = (categoryId: number | string) => {
     setImageErrors((prev) => ({ ...prev, [categoryId]: true }));
   };
 
-  // Обработчики свайпа
-  const handleTouchStart = (e: React.TouchEvent) => {
-    startX.current = e.touches[0].clientX;
-    currentX.current = startX.current;
+  // Начало drag (touch или mouse)
+  const handleStart = (clientX: number) => {
+    startX.current = clientX;
+    currentX.current = clientX;
+    startTranslateX.current = translateX;
     isDragging.current = true;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  // Движение drag
+  const handleMove = (clientX: number) => {
     if (!isDragging.current) return;
-    currentX.current = e.touches[0].clientX;
+    currentX.current = clientX;
     const deltaX = currentX.current - startX.current;
-    setTranslateX(deltaX);
+    setTranslateX(startTranslateX.current + deltaX); 
   };
 
-  const handleTouchEnd = () => {
+  // Конец drag
+  const handleEnd = () => {
     if (!isDragging.current) return;
     isDragging.current = false;
     const deltaX = currentX.current - startX.current;
-    const threshold = 50;
-    const cardWidth = 66;
-    let newTranslateX = 0;
+    const gap = 5; // Из CSS
+    const step = cardWidth + gap; 
+    const threshold = cardWidth * 0.3; 
+    let newTranslateX = startTranslateX.current; 
 
     if (deltaX > threshold) {
-      // Свайп вправо — сдвигаем влево (показываем предыдущие)
-      newTranslateX = Math.min(0, translateX + cardWidth);
+      // Свайп вправо — показываем предыдущие (сдвигаем влево)
+      newTranslateX = Math.min(0, startTranslateX.current + step);
     } else if (deltaX < -threshold) {
-      // Свайп влево — сдвигаем вправо (показываем следующие)
-      const maxTranslate = -(filteredCategories.length - 1) * cardWidth;
-      newTranslateX = Math.max(maxTranslate, translateX - cardWidth);
+      // Свайп влево — показываем следующие (сдвигаем вправо)
+      const maxTranslate = -(filteredCategories.length - 1) * step;
+      newTranslateX = Math.max(maxTranslate, startTranslateX.current - step);
     }
+    // Если свайп мал, остаёмся на месте (newTranslateX = startTranslateX.current)
     setTranslateX(newTranslateX);
   };
 
-  // Фильтрация: показываем только категории с валидными изображениями
+  // Touch-события
+  const handleTouchStart = (e: React.TouchEvent) =>
+    handleStart(e.touches[0].clientX);
+  const handleTouchMove = (e: React.TouchEvent) =>
+    handleMove(e.touches[0].clientX);
+  const handleTouchEnd = handleEnd;
+
+  // Mouse-события для десктопа
+  const handleMouseDown = (e: React.MouseEvent) => handleStart(e.clientX);
+  const handleMouseMove = (e: React.MouseEvent) => handleMove(e.clientX);
+  const handleMouseUp = handleEnd;
+
+  // Фильтрация категорий
   const filteredCategories = categories.filter((category) => {
     const hasValidImage =
       category.Category_Image &&
@@ -80,6 +111,12 @@ const CategorySlider = ({
     return hasValidImage;
   });
 
+  if (filteredCategories.length === 0) {
+    return (
+      <div className={styles.categorySlider}>Нет категорий для отображения</div>
+    );
+  }
+
   return (
     <div className={styles.categorySlider}>
       <div
@@ -88,45 +125,45 @@ const CategorySlider = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ transform: `translateX(${translateX}px)` }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{
+          transform: `translateX(${translateX}px)`,
+          transition: isDragging.current ? "none" : "transform 0.3s ease",
+        }}
       >
-        {filteredCategories.map((category) => {
-          const isImageError = imageErrors[category.Category_ID] || false;
-
-          return (
-            <div
-              key={category.Category_ID}
-              className={styles.categoryCardLink}
-              role="button"
-              tabIndex={0}
-              onClick={() => onCategoryClick(category.Category_ID)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") onCategoryClick(category.Category_ID);
-              }}
-            >
-              {!isImageError ? (
+        {filteredCategories.map((category) => (
+          <div
+            key={category.Category_ID}
+            className={styles.categoryCard}
+            onClick={() => onCategoryClick(category.Category_ID)}
+          >
+            <div className={styles.imageContainer}>
+              {!imageErrors[category.Category_ID] ? (
                 <img
                   src={category.Category_Image}
-                  alt={category.Category_Name || "Категория"}
+                  alt={category.Category_Name || "Category"}
                   className={styles.categoryImage}
                   onError={() => handleImageError(category.Category_ID)}
                 />
               ) : (
-                <div className={styles.noImageMessage}>
-                  <span>Нет фото</span>
+                <div className={styles.placeholder}>
+                  {normalizeTitle(category.Category_Name || "Категория")}
                 </div>
               )}
-              {category.Category_Name && (
-                <p className={styles.categoryName}>
-                  {normalizeTitle(category.Category_Name)}
-                </p>
-              )}
             </div>
-          );
-        })}
+            {category.Category_Name && (
+              <div className={styles.categoryTitle}>
+                {normalizeTitle(category.Category_Name)}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
 export default CategorySlider;
+
