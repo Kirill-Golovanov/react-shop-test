@@ -1,0 +1,82 @@
+.categorySlider {
+  overflow: hidden;
+  width: 100%;
+}
+
+.sliderContainer {
+  display: flex;
+  gap: 5px;
+  transition: transform 0.3s ease;
+}
+
+.categoryCardLink {
+  cursor: pointer;
+  width: 66px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.categoryImage {
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.categoryName {
+  color: #292928;
+  font-weight: 500;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noImageMessage {
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  font-size: 10px;
+  color: #292928;
+  text-align: center;
+  border: 1px solid #292928;
+}
+
+@media (min-width: 425px) {
+  .categoryCardLink {
+    width: 79px;
+  }
+
+  .categoryImage,
+  .noImageMessage {
+    width: 79px;
+    height: 79px;
+  }
+
+  .categoryName {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 600px) {
+  .categoryCardLink {
+    width: 114px;
+  }
+
+  .categoryImage,
+  .noImageMessage {
+    width: 114px;
+    height: 114px;
+  }
+
+  .categoryName {
+    font-size: 13px;
+  }
+}

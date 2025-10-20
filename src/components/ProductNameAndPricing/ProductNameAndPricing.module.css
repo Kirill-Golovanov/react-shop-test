@@ -1,0 +1,38 @@
+.container {
+ display: flex;
+ flex-direction: column;
+ gap:1px;
+}
+
+.productName {
+font-weight: 400;
+font-size: 14px;
+color: #292928;
+}
+
+.pricingBlock {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+
+.oldPrice {
+  text-decoration: line-through;
+  font-weight: 500;
+  font-size: 11px;
+  color: rgba(41, 41, 40, 0.3);
+}
+
+.currentPrice {
+  font-weight: 700;
+  font-size: 17px;
+  color: #292928;
+}
+
+.discountBadge {
+  color: #f24131;
+  font-weight: 600;
+  font-size: 11px;
+}
+

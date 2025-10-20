@@ -1,0 +1,12 @@
+
+.btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn__icon {
+  width: 20px;
+  height: 20px;
+}

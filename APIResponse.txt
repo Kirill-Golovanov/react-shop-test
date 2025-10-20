@@ -1,0 +1,32 @@
+Ответ API:
+{categories: Array(204), id_mark_for_sale: 1, pagination: {…}, products: Array(11), special_project_parameters: {…}, …}
+categories
+:
+(204) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+id_mark_for_sale
+:
+1
+pagination
+:
+{current_page: 1, has_next: false, has_prev: false, per_page: 20, total_pages: 1, …}
+products
+:
+(11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+special_project_parameters
+:
+{PAYMENT_SYSTEM_INSERT_TEXT_description: 'Спасибо за заказ в нашем царстве', PAYMENT_SYSTEM_INSERT_TEXT_extra_field_1: 'Не потеряй гордость, заплати нашему царю за товарр', PAYMENT_SYSTEM_INSERT_TEXT_value: '1', PAYMENT_SYSTEM_value: 'yokassa_payment_system', SERVER_IP_ADDR_description: 'http://localhost:7777', …}
+special_project_parameters_actions
+:
+(4) [{…}, {…}, {…}, {…}]
+special_project_parameters_badges
+:
+(7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+special_project_parameters_json
+:
+{delivery_method: {…}, disabled_gpt_models: {…}, fast_search_strings: {…}, global_reviews: {…}, is_side_menu: true, …}
+status
+:
+"ok"
+[[Prototype]]
+:
+Object

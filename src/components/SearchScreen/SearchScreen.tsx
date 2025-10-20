@@ -1,0 +1,252 @@
+import React, { useState, useEffect, useRef } from "react";
+import searchIcon from "../../assets/icons/icon-search.svg";
+import styles from "./SearchScreen.module.css";
+import ReactDOM from "react-dom";
+
+interface SearchScreenProps {
+  products: any[]; // Товары из GET (для "Часто ищут")
+  onClose: () => void;
+  onOpen: () => void;
+}
+
+const SearchScreen: React.FC<SearchScreenProps> = ({
+  products,
+  onClose,
+  onOpen,
+}) => {
+  const [query, setQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [dropdownStyle, setDropdownStyle] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  // Функция для расчета позиции dropdown с учётом header/footer
+  const updateDropdownPosition = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      const headerHeight = 30; // высота header
+      const footerHeight = 100; //высота footer
+      const viewportHeight = window.innerHeight;
+      const availableHeight = viewportHeight - headerHeight - footerHeight;
+
+      setDropdownStyle({
+        top: Math.max(rect.bottom, headerHeight),
+        left: rect.left,
+        width: rect.width,
+        maxHeight: `${availableHeight}px`,
+        overflowY: "auto",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (showDropdown) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
+    }
+
+    return () => {
+      document.body.classList.remove("no-scroll");
+    };
+  }, [showDropdown]);
+
+  useEffect(() => {
+    updateDropdownPosition();
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => window.removeEventListener("resize", updateDropdownPosition);
+  }, []);
+
+  // Эффект для поиска: срабатывает при изменении query (с debounce 300ms)
+  useEffect(() => {
+    if (query.trim() === "") {
+      setFilteredProducts([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    const debounceTimer = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          "https://noxer-test.ru/webapp/api/products/filter?per_page=10&page=1",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ search: query }),
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP ошибка: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.status === "ok") {
+          setFilteredProducts(data.products || []);
+        } else {
+          setError("Ошибка API: " + (data.message || "Неизвестная ошибка"));
+        }
+      } catch (err: any) {
+        setError("Ошибка сети: " + err.message);
+      }
+      setLoading(false);
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [query]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+  };
+
+  const handleFocus = () => {
+    onOpen();
+    setShowDropdown(true);
+    updateDropdownPosition();
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      setQuery("");
+      setShowDropdown(false);
+      setFilteredProducts([]);
+      setLoading(false);
+      setError(null);
+      onClose();
+    }, 200);
+  };
+
+  const handleNavigate = (product: any) => {
+    if (!product.id) {
+      return;
+    }
+    setShowDropdown(false);
+    onClose();
+  };
+
+  // Хелпер для получения URL изображения
+  const getProductImage = (product: any) => {
+    const mainImage =
+      product.images?.find((img: any) => img.MainImage) || product.images?.[0];
+    return mainImage?.Image_URL || null;
+  };
+
+  return (
+    <div className={styles.searchScreen}>
+      <div className={styles.searchContainer}>
+        <img
+          src={searchIcon}
+          alt="Иконка поиска"
+          className={styles.searchIcon}
+        />
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          placeholder="Найти товары"
+          className={styles.searchInput}
+        />
+      </div>
+
+      {/* Рендерим dropdown через портал, чтобы он был поверх страницы */}
+      {showDropdown &&
+        ReactDOM.createPortal(
+          <div className={styles.searchDropdown} style={dropdownStyle}>
+            {/* Весь контент dropdown остаётся без изменений */}
+            {!query && (
+              <div className={styles.searchSection}>
+                <h4 className={styles.sectionTitle}>Часто ищут</h4>
+                <div className={styles.searchItems}>
+                  {products.slice(0, 10).map((product, index) => (
+                    <div
+                      key={`popular-${product.id || `fallback-${index}`}`}
+                      className={styles.searchItem}
+                      onClick={() => handleNavigate(product)}
+                    >
+                      <img src={searchIcon} alt="Иконка поиска" />
+                      <span>{product.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Loading для поиска */}
+            {query && loading && (
+              <div className={styles.searchSection}>
+                <p>Ищем...</p>
+              </div>
+            )}
+            {/* Ошибка поиска */}
+            {query && error && (
+              <div className={styles.searchSection}>
+                <p style={{ color: "red" }}>{error}</p>
+              </div>
+            )}
+
+            {/* "Результаты поиска" показываются только если query не пустой, нет loading и есть результаты */}
+            {query && !loading && !error && filteredProducts.length > 0 && (
+              <div className={styles.searchSection__withCards}>
+                {/* <h4 className={styles.sectionTitle}>Результаты поиска</h4> */}
+                <div className={styles.searchItems}>
+                  {filteredProducts.map((product, index) => {
+                    const imageUrl = getProductImage(product);
+                    const key = product.id || `fallback-${index}`;
+                    const hasError = imageErrors[key];
+                    return (
+                      <div
+                        key={key}
+                        className={styles.searchItem__сard}
+                        onClick={() => handleNavigate(product)}
+                      >
+                        {imageUrl && !hasError && (
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                              borderRadius: "10px",
+                            }}
+                            onError={() => {
+                              setImageErrors((prev) => ({
+                                ...prev,
+                                [key]: true,
+                              }));
+                            }}
+                          />
+                        )}
+                        {(!imageUrl || hasError) && (
+                          <span className={styles.noPhoto}>нет фото</span>
+                        )}
+                        <span>{product.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* "Ничего не найдено" показывается только если query не пустой, нет loading, нет ошибки и результатов нет */}
+            {query && !loading && !error && filteredProducts.length === 0 && (
+              <div className={styles.searchSection}>
+                <p></p>
+                <h4 className={styles.sectionTitle}>Ничего не найдено</h4>
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+};
+
+export default SearchScreen;
