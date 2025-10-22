@@ -74,7 +74,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({
       setError(null);
       try {
         const response = await fetch(
-         'https://noxer-test.ru/webapp/api/products/filter?per_page=50&page=2',
+         'https://noxer-test.ru/webapp/api/products/filter?per_page=50&page=1',
           {
             method: "POST",
             headers: {
@@ -238,7 +238,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({
             {/* "Ничего не найдено" показывается только если query не пустой, нет loading, нет ошибки и результатов нет */}
             {query && !loading && !error && filteredProducts.length === 0 && (
               <div className={styles.searchSection}>
-                <p></p>
                 <h4 className={styles.sectionTitle}>Ничего не найдено</h4>
               </div>
             )}
