@@ -74,7 +74,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({
       setError(null);
       try {
         const response = await fetch(
-          "https://noxer-test.ru/webapp/api/products/filter?per_page=10&page=2",
+         'https://noxer-test.ru/webapp/api/products/filter?per_page=50&page=2',
           {
             method: "POST",
             headers: {
