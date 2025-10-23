@@ -81,7 +81,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ search: query }),
-          }
+          } 
         );
         if (!response.ok) {
           throw new Error(`HTTP ошибка: ${response.status}`);

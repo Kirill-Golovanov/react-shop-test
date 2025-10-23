@@ -1,15 +1,17 @@
 .categorySlider {
   overflow: hidden;
   width: 100%;
+  position: relative;
 }
 
 .sliderContainer {
   display: flex;
   gap: 5px;
   transition: transform 0.3s ease;
+  will-change: transform;
 }
 
-.categoryCardLink {
+.categoryCard {
   cursor: pointer;
   width: 66px;
   text-align: center;
@@ -17,27 +19,28 @@
   flex-direction: column;
   gap: 3px;
   flex-shrink: 0;
+  user-select: none;
+  outline: none;
+}
+
+.imageContainer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  width: 100%;
+  height: 66px;
 }
 
 .categoryImage {
-  width: 66px;
-  height: 66px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 15px;
+  display: block;
 }
 
-.categoryName {
-  color: #292928;
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.noImageMessage {
-  width: 66px;
-  height: 66px;
+.placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,36 +50,62 @@
   color: #292928;
   text-align: center;
   border: 1px solid #292928;
+  box-sizing: border-box;
 }
 
+.categoryTitle {
+  color: #292928;
+  font-weight: 500;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  padding: 0;
+}
+
+/* Адаптивные стили */
 @media (min-width: 425px) {
-  .categoryCardLink {
+  .categoryCard {
     width: 79px;
   }
 
+  .imageContainer,
   .categoryImage,
-  .noImageMessage {
-    width: 79px;
+  .placeholder {
     height: 79px;
   }
 
-  .categoryName {
+  .categoryTitle {
     font-size: 12px;
   }
 }
 
 @media (min-width: 600px) {
-  .categoryCardLink {
+  .categoryCard {
     width: 114px;
   }
 
+  .imageContainer,
   .categoryImage,
-  .noImageMessage {
-    width: 114px;
+  .placeholder {
     height: 114px;
   }
 
-  .categoryName {
+  .categoryTitle {
     font-size: 13px;
+  }
+}
+
+/* Стили для фокуса (доступность) */
+.categoryCard:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Оптимизация для touch-устройств */
+@media (hover: none) {
+  .categoryCard {
+    touch-action: pan-y;
   }
 }
