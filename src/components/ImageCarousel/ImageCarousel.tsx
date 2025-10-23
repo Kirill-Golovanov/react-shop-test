@@ -10,12 +10,16 @@ interface ImageCarouselProps {
   items: CarouselItem[];
   fallbackText?: string;
   onItemClick?: (item: CarouselItem, index: number) => void;
+  dotClass?: string; // Класс для точек
+  activeDotClass?: string; // Класс для активной точки
 }
 
 const ImageCarousel = ({
   items,
   fallbackText = "Изображение недоступно",
   onItemClick,
+  dotClass, // Добавили в деструктуризацию
+  activeDotClass, // Добавили в деструктуризацию
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -33,7 +37,8 @@ const ImageCarousel = ({
   }
 
   // Проверка валидности URL
-  const isValidUrl = currentItem.imageUrl && /^https?:\/\//.test(currentItem.imageUrl);
+  const isValidUrl =
+    currentItem.imageUrl && /^https?:\/\//.test(currentItem.imageUrl);
 
   // Обработчики свайпов
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -77,7 +82,9 @@ const ImageCarousel = ({
             src={currentItem.imageUrl}
             alt={currentItem.description || "Изображение"}
             className={styles.image}
-            onClick={() => onItemClick && onItemClick(currentItem, currentIndex)}
+            onClick={() =>
+              onItemClick && onItemClick(currentItem, currentIndex)
+            }
             onError={(e) => {
               if (!(e.target instanceof HTMLImageElement)) return;
               e.target.style.display = "none";
@@ -100,7 +107,10 @@ const ImageCarousel = ({
           {items.map((_, index) => (
             <button
               key={`dot-${index}`}
-              className={`${styles.dot} ${index === currentIndex ? styles.active : ""}`}
+              className={`
+              ${dotClass || styles.dot}
+              ${index === currentIndex ? activeDotClass || styles.active : ""}
+  `}
               onClick={() => setCurrentIndex(index)}
               aria-label={`Перейти к слайду ${index + 1}`}
               aria-current={index === currentIndex}

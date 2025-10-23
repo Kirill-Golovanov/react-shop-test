@@ -47,16 +47,16 @@
   color: #292928;
 }
 
-.dots {
+/* .dots {
   position: absolute;
   bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 3px;
-}
+} */
 
-.dot {
+.customDot {
   width: 3px;
   height: 3px;
   opacity: 1;
@@ -73,7 +73,7 @@
   box-shadow: none;
 }
 
-.dot.active {
+.customActive {
   background: #292928;
 }
 
